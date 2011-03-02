@@ -1,6 +1,7 @@
 package com.tbiczel.zad1.gui;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
@@ -14,6 +15,7 @@ public class ImagePanel extends JPanel {
 
 	public ImagePanel() {
 		setBorder(BorderFactory.createLineBorder(Color.black));
+		setPreferredSize(new Dimension(400, 400));
 	}
 
 	public void paint(Graphics g) {
@@ -22,6 +24,7 @@ public class ImagePanel extends JPanel {
 
 	public void setImg(BufferedImage img) {
 		this.img = img;
+		setPreferredSize(new Dimension(img.getWidth(), img.getHeight()));
 	}
 
 	public BufferedImage getImg() {

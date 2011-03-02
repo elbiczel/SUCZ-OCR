@@ -6,23 +6,32 @@ import java.awt.Font;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 public class MainPanel extends JPanel {
 
 	private static final long serialVersionUID = -1057394803352666439L;
-	
+
 	JPanel southPanel = null;
 	JPanel eastPanel = null;
-	
-	private ImagePanel image;
+
+	private JScrollPane imageScroll = null;
+	private ImagePanel image = null;
 
 	public void removeImage() {
 		remove(image);
 	}
 
 	public void setImage(ImagePanel image) {
+		if (this.image == image) {
+			return;
+		}
+		if (this.image != null) {
+			remove(imageScroll);
+		}
 		this.image = image;
-		add(image, BorderLayout.CENTER);
+		imageScroll = new JScrollPane(image);
+		add(imageScroll, BorderLayout.CENTER);
 	}
 
 	public MainPanel(String title) {
@@ -32,16 +41,14 @@ public class MainPanel extends JPanel {
 		titleLable.setFont(font);
 		titleLable.setLocation(0, 32);
 
-		image = new ImagePanel();
-
 		setOpaque(true);
 		setLayout(new BorderLayout());
 		setBackground(Color.white);
 
 		add(titleLable, BorderLayout.NORTH);
-		add(image, BorderLayout.CENTER);
+		setImage(new ImagePanel());
 	}
-	
+
 	public void setEastPanel(JPanel eastPanel) {
 		if (this.eastPanel != null) {
 			remove(eastPanel);
@@ -51,7 +58,7 @@ public class MainPanel extends JPanel {
 			add(eastPanel, BorderLayout.EAST);
 		}
 	}
-	
+
 	public void setSouthPanel(JPanel southPanel) {
 		if (this.southPanel != null) {
 			remove(southPanel);

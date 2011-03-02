@@ -1,5 +1,6 @@
 package com.tbiczel.zad1.controller;
 
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -10,7 +11,10 @@ import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.SwingWorker;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import com.tbiczel.zad1.gui.ImagePanel;
 import com.tbiczel.zad1.gui.MainPanel;
@@ -27,6 +31,10 @@ public class ImageController {
 	private JFileChooser fc;
 	private JButton openButton;
 	private JButton processButton;
+	private JSlider minSlider;
+	private JSlider maxSlider;
+	private static final int MIN_SLIDER_VALUE = 0;
+	private static final int MAX_SLIDER_VALUE = 255 + 255 + 255;
 
 	private JPanel east = new JPanel();
 	private JPanel south = new JPanel();
@@ -71,9 +79,49 @@ public class ImageController {
 
 		});
 
-		south.add(openButton);
-		south.add(processButton);
+		east.setLayout(new GridLayout(0, 1));
+		east.add(openButton);
+		east.add(processButton);
+		main.setEastPanel(east);
+
+		minSlider = createSlider(370);
+		maxSlider = createSlider(650);
+		minSlider.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				JSlider source = (JSlider) e.getSource();
+				if (!source.getValueIsAdjusting()) {
+					min = (int) source.getValue();
+				}
+			}
+
+		});
+		maxSlider.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				JSlider source = (JSlider) e.getSource();
+				if (!source.getValueIsAdjusting()) {
+					max = (int) source.getValue();
+				}
+			}
+
+		});
+
+		south.setLayout(new GridLayout(2, 1));
+		south.add(minSlider);
+		south.add(maxSlider);
 		main.setSouthPanel(south);
+	}
+
+	private JSlider createSlider(int val) {
+		JSlider result = new JSlider(MIN_SLIDER_VALUE, MAX_SLIDER_VALUE, val);
+		result.setMajorTickSpacing(50);
+		result.setMinorTickSpacing(5);
+		result.setPaintTicks(true);
+		result.setPaintLabels(true);
+		return result;
 	}
 
 	public ImagePanel readImage(File file) {

@@ -3,28 +3,18 @@ package com.tbiczel.zad1.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
 
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-
-import com.tbiczel.zad1.controller.ImageController;
-import com.tbiczel.zad1.io.ImageFilter;
 
 public class MainPanel extends JPanel {
 
 	private static final long serialVersionUID = -1057394803352666439L;
-	private JFileChooser fc;
-	JPanel southPanel = new JPanel();
-	JPanel eastPanel = new JPanel();
-	private JButton openButton;
-	private JButton processButton;
+	
+	JPanel southPanel = null;
+	JPanel eastPanel = null;
+	
 	private ImagePanel image;
-	private ImageController ic;
 
 	public void removeImage() {
 		remove(image);
@@ -36,9 +26,6 @@ public class MainPanel extends JPanel {
 	}
 
 	public MainPanel(String title) {
-		fc = new JFileChooser();
-		fc.addChoosableFileFilter(new ImageFilter());
-		fc.setAcceptAllFileFilterUsed(false);
 
 		Font font = new Font("SansSerif", Font.BOLD, 24);
 		JLabel titleLable = new JLabel(title);
@@ -46,40 +33,12 @@ public class MainPanel extends JPanel {
 		titleLable.setLocation(0, 32);
 
 		image = new ImagePanel();
-		ic = new ImageController();
-
-		openButton = new JButton("Open an image...");
-		openButton.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				int returnVal = fc.showOpenDialog(MainPanel.this);
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					ic.cancelProcessing();
-					File file = fc.getSelectedFile();
-					ic.readImage(file, MainPanel.this);
-				}
-			}
-
-		});
-		processButton = new JButton("Process image...");
-		processButton.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				ic.cancelProcessing();
-				ic.processImage(MainPanel.this);
-			}
-
-		});
-
-		southPanel.add(openButton);
-		southPanel.add(processButton);
 
 		setOpaque(true);
 		setLayout(new BorderLayout());
 		setBackground(Color.white);
 
 		add(titleLable, BorderLayout.NORTH);
-		add(southPanel, BorderLayout.SOUTH);
 		add(image, BorderLayout.CENTER);
 	}
 	

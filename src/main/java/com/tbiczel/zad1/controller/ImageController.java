@@ -3,8 +3,6 @@ package com.tbiczel.zad1.controller;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +18,7 @@ import javax.swing.event.ChangeListener;
 
 import com.tbiczel.zad1.gui.ImagePanel;
 import com.tbiczel.zad1.gui.MainPanel;
+import com.tbiczel.zad1.gui.Selector;
 import com.tbiczel.zad1.io.ImageFilter;
 import com.tbiczel.zad1.processing.ImageProcessor;
 import com.tbiczel.zad1.processing.ImageUtils;
@@ -38,10 +37,14 @@ public class ImageController {
 	private static final int MIN_SLIDER_VALUE = 0;
 	private static final int MAX_SLIDER_VALUE = 255 + 255 + 255;
 
+	private Selector selector;
+
 	private JPanel east = new JPanel();
 	private JPanel south = new JPanel();
 
 	private BufferedImage image;
+
+	private BufferedImage selectedRegion = null;
 
 	private File safeCopy;
 
@@ -178,18 +181,9 @@ public class ImageController {
 
 	private void changeImage() {
 		utils = new ImageUtils(image);
-		panel.addMouseListener(new MouseAdapter() {
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				System.out.println("Mouse: " + e.getY() + ", " + e.getX());
-				System.out.println("LineDarkness: "
-						+ utils.getLineDarkness(e.getY()));
-				System.out.println("PixelDarkness: "
-						+ utils.getPixelDarkness(e.getY(), e.getX()));
-			}
-
-		});
+		selector = new Selector(this, panel, utils);
+		panel.addMouseListener(selector);
+		panel.addMouseMotionListener(selector);
 		main.removeImage();
 		main.setImage(panel);
 		main.revalidate();
@@ -198,6 +192,10 @@ public class ImageController {
 
 	public MainPanel getMain() {
 		return main;
+	}
+
+	public void setSelectedRegion(int x, int y, int w, int h) {
+		selectedRegion = image.getSubimage(x, y, w, h);
 	}
 
 }

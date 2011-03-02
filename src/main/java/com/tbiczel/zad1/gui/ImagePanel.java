@@ -2,7 +2,7 @@ package com.tbiczel.zad1.gui;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Image;
+import java.awt.image.BufferedImage;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 public class ImagePanel extends JPanel {
 
 	private static final long serialVersionUID = 7279307541489873546L;
-	private Image img = null;
+	private BufferedImage img = null;
 
 	public ImagePanel() {
 		setBorder(BorderFactory.createLineBorder(Color.black));
@@ -20,8 +20,12 @@ public class ImagePanel extends JPanel {
 		g.drawImage(img, 0, 0, null);
 	}
 
-	public void setImg(Image img) {
+	public void setImg(BufferedImage img) {
 		this.img = img;
+	}
+
+	public BufferedImage getImg() {
+		return img;
 	}
 
 }

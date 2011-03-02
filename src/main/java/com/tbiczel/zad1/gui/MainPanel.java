@@ -19,9 +19,21 @@ public class MainPanel extends JPanel {
 
 	private static final long serialVersionUID = -1057394803352666439L;
 	private JFileChooser fc;
+	JPanel southPanel = new JPanel();
+	JPanel eastPanel = new JPanel();
 	private JButton openButton;
+	private JButton processButton;
 	private ImagePanel image;
 	private ImageController ic;
+
+	public void removeImage() {
+		remove(image);
+	}
+
+	public void setImage(ImagePanel image) {
+		this.image = image;
+		add(image, BorderLayout.CENTER);
+	}
 
 	public MainPanel(String title) {
 		fc = new JFileChooser();
@@ -42,27 +54,53 @@ public class MainPanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				int returnVal = fc.showOpenDialog(MainPanel.this);
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					ic.cancelProcessing();
 					File file = fc.getSelectedFile();
-					MainPanel.this.remove(image);
-					MainPanel.this.image = ic.read(file);
-					MainPanel.this.add(image, BorderLayout.CENTER);
-					MainPanel.this.revalidate();
-					MainPanel.this.repaint();
+					ic.readImage(file, MainPanel.this);
 				}
 			}
 
 		});
+		processButton = new JButton("Process image...");
+		processButton.addActionListener(new ActionListener() {
 
-		JPanel buttonPanel = new JPanel();
-		buttonPanel.add(openButton);
+			public void actionPerformed(ActionEvent e) {
+				ic.cancelProcessing();
+				ic.processImage(MainPanel.this);
+			}
+
+		});
+
+		southPanel.add(openButton);
+		southPanel.add(processButton);
 
 		setOpaque(true);
 		setLayout(new BorderLayout());
 		setBackground(Color.white);
 
 		add(titleLable, BorderLayout.NORTH);
-		add(buttonPanel, BorderLayout.SOUTH);
+		add(southPanel, BorderLayout.SOUTH);
 		add(image, BorderLayout.CENTER);
+	}
+	
+	public void setEastPanel(JPanel eastPanel) {
+		if (this.eastPanel != null) {
+			remove(eastPanel);
+		}
+		this.eastPanel = eastPanel;
+		if (this.eastPanel != null) {
+			add(eastPanel, BorderLayout.EAST);
+		}
+	}
+	
+	public void setSouthPanel(JPanel southPanel) {
+		if (this.southPanel != null) {
+			remove(southPanel);
+		}
+		this.southPanel = southPanel;
+		if (this.southPanel != null) {
+			add(southPanel, BorderLayout.SOUTH);
+		}
 	}
 
 }

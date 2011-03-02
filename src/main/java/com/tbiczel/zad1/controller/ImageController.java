@@ -3,6 +3,8 @@ package com.tbiczel.zad1.controller;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -176,6 +178,18 @@ public class ImageController {
 
 	private void changeImage() {
 		utils = new ImageUtils(image);
+		panel.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				System.out.println("Mouse: " + e.getY() + ", " + e.getX());
+				System.out.println("LineDarkness: "
+						+ utils.getLineDarkness(e.getY()));
+				System.out.println("PixelDarkness: "
+						+ utils.getPixelDarkness(e.getY(), e.getX()));
+			}
+
+		});
 		main.removeImage();
 		main.setImage(panel);
 		main.revalidate();

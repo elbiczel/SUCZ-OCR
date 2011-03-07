@@ -6,10 +6,6 @@ import java.awt.image.BufferedImage;
 
 public class ImageProcessor {
 
-	private static final Color RED = new Color(255, 0, 0);
-
-	private static final Color GREEN = new Color(0, 255, 0);
-
 	private BufferedImage img;
 
 	private LineSelector lineSelect;
@@ -22,7 +18,7 @@ public class ImageProcessor {
 	public BufferedImage process() {
 		for (BufferedImage line : lineSelect.getLines()) {
 			Graphics2D g = line.createGraphics();
-			g.setPaint(RED);
+			g.setPaint(Color.RED);
 			g.drawRect(0, 0, line.getWidth() - 1, line.getHeight() - 1);
 		}
 		img.flush();

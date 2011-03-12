@@ -8,9 +8,9 @@ public class LineSelector {
 	private BufferedImage img;
 	private ImageUtils utils;
 
-	public LineSelector(BufferedImage img, int min, int max) {
+	public LineSelector(BufferedImage img, int min, int max, ImageUtils utils) {
 		this.img = img;
-		utils = new ImageUtils(img);
+		this.utils = utils;
 		this.min = min;
 		this.max = max;
 	}

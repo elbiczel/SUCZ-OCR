@@ -7,12 +7,15 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingWorker;
@@ -29,19 +32,20 @@ import com.tbiczel.zad1.processing.LinesData;
 
 public class ImageController {
 
+	private static final int blackThreshold = 100;
+
 	private MainPanel main;
 
 	private ImagePanel panel;
 
 	private JFileChooser fc;
+	private JFileChooser outFileChooser;
 	private JButton openButton;
 	private JButton processButton;
 	private JButton dumpButton;
-	private JSlider minSlider;
-	private JSlider maxSlider;
+	private JSlider minSlider = null;
+	private JSlider maxSlider = null;
 	private JSlider lineHeightSlider;
-	private static final int MIN_SLIDER_VALUE = 0;
-	private static final int MAX_SLIDER_VALUE = 255 + 255 + 255;
 
 	private Selector selector;
 
@@ -58,15 +62,16 @@ public class ImageController {
 
 	private ImageUtils utils;
 
-	private int min = 370;
+	private int min = 0;
 
-	private int max = 255 + 255 + 140;
+	private int max = 0;
 
 	public ImageController(String title) {
 		this.main = new MainPanel(title);
 		fc = new JFileChooser();
 		fc.addChoosableFileFilter(new ImageFilter());
 		fc.setAcceptAllFileFilterUsed(true);
+		outFileChooser = new JFileChooser();
 		openButton = new JButton("Open an image...");
 		openButton.addActionListener(new ActionListener() {
 
@@ -76,6 +81,13 @@ public class ImageController {
 					ImageController.this.cancelProcessing();
 					File file = fc.getSelectedFile();
 					ImageController.this.readImage(file);
+					if (minSlider != null) {
+						south.remove(minSlider);
+					}
+					if (maxSlider != null) {
+						south.remove(maxSlider);
+					}
+					addSliders();
 				}
 			}
 
@@ -95,10 +107,13 @@ public class ImageController {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				ImageController.this.cancelProcessing();
-				String selectedClassName = null;
-				String fileName = null;
-				ImageController.this.dumpData(lineHeightSlider.getValue(),
-						selectedClassName, fileName);
+				String selectedClassName = JOptionPane.showInputDialog(main,
+						"class name");
+				int returnVal = outFileChooser.showSaveDialog(main);
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					ImageController.this.dumpData(lineHeightSlider.getValue(),
+							selectedClassName, outFileChooser.getSelectedFile());
+				}
 			}
 
 		});
@@ -108,41 +123,15 @@ public class ImageController {
 		east.add(dumpButton);
 		main.setEastPanel(east);
 
-		minSlider = createSlider(370);
-		maxSlider = createSlider(650);
 		lineHeightSlider = createSlider(0, 25, 10, 5, 1);
-		minSlider.addChangeListener(new ChangeListener() {
-
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				JSlider source = (JSlider) e.getSource();
-				if (!source.getValueIsAdjusting()) {
-					min = (int) source.getValue();
-				}
-			}
-
-		});
-		maxSlider.addChangeListener(new ChangeListener() {
-
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				JSlider source = (JSlider) e.getSource();
-				if (!source.getValueIsAdjusting()) {
-					max = (int) source.getValue();
-				}
-			}
-
-		});
 
 		south.setLayout(new GridLayout(0, 1));
-		south.add(minSlider);
-		south.add(maxSlider);
 		south.add(lineHeightSlider);
 		main.setSouthPanel(south);
 	}
 
-	private JSlider createSlider(int val) {
-		return createSlider(MIN_SLIDER_VALUE, MAX_SLIDER_VALUE, val, 50, 5);
+	private JSlider createSlider(int max, int val) {
+		return createSlider(0, max, val, 50, 5);
 	}
 
 	private JSlider createSlider(int minVal, int maxVal, int val,
@@ -159,6 +148,7 @@ public class ImageController {
 		try {
 			panel = new ImagePanel();
 			image = ImageIO.read(file);
+			utils = new ImageUtils(image, blackThreshold);
 			safeCopy = file;
 			panel.setImg(image);
 			changeImage();
@@ -169,43 +159,41 @@ public class ImageController {
 	}
 
 	protected void dumpData(final int lineHeight,
-			final String selectedClassName, final String fileName) {
+			final String selectedClassName, final File file) {
 		if (selectedRegion == null) {
 			return;
 		}
 		worker = new SwingWorker<ImagePanel, Void>() {
-			private LinesData<Integer> lines = new LinesData<Integer>(765);
-
-			// private File file = new File(fileName);
+			private LinesData<Integer> lines = new LinesData<Integer>(image.getWidth());
 
 			@Override
 			protected ImagePanel doInBackground() throws Exception {
 				for (int i = 0; i < image.getHeight(); i++) {
 					lines.putLineData(i, utils.getLineDarkness(i));
 				}
-				// FileOutputStream out = new FileOutputStream(file);
-				System.out.println("DUMP DATA");
+				file.createNewFile();
+				System.out.println(file.getAbsolutePath());
+				BufferedWriter out = new BufferedWriter(new FileWriter(file,
+						true));
 				for (int i = 0; i < selectedRegion.height; i++) {
 					StringBuilder sb = new StringBuilder();
-					for (int row = selectedRegion.y - lineHeight; row < selectedRegion.y
-							+ lineHeight + 1; row++) {
+					for (int row = selectedRegion.y + i - lineHeight; row < selectedRegion.y
+							+ i + lineHeight + 1; row++) {
 						sb.append(lines.getLine(row));
 						sb.append(',');
 					}
 					sb.append(selectedClassName);
 					sb.append('\n');
-					System.out.print(sb.toString());
-					// ByteArrayInputStream ba = new ByteArrayInputStream(new
-					// byte[sb.length()]);
-					// out.write();
+					out.write(sb.toString());
 				}
-				// out.close();
+				out.close();
 				return null;
 			}
 
 			@Override
 			protected void done() {
-				// TODO show done dialog
+				JOptionPane.showMessageDialog(main, "Dumping finished", "Done",
+						JOptionPane.INFORMATION_MESSAGE);
 			}
 		};
 		worker.execute();
@@ -219,7 +207,7 @@ public class ImageController {
 			@Override
 			protected ImagePanel doInBackground() throws Exception {
 				BufferedImage img = ImageIO.read(safeCopy);
-				proc = new ImageProcessor(img, min, max);
+				proc = new ImageProcessor(img, min, max, utils);
 				img = proc.process();
 				ImagePanel panel = new ImagePanel();
 				panel.setImg(img);
@@ -250,7 +238,6 @@ public class ImageController {
 	}
 
 	private void changeImage() {
-		utils = new ImageUtils(image);
 		selector = new Selector(this, panel, utils);
 		panel.addMouseListener(selector);
 		panel.addMouseMotionListener(selector);
@@ -258,6 +245,35 @@ public class ImageController {
 		main.setImage(panel);
 		main.revalidate();
 		main.repaint();
+	}
+
+	private void addSliders() {
+		minSlider = createSlider(image.getWidth(), 0);
+		maxSlider = createSlider(image.getWidth(), 0);
+		minSlider.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				JSlider source = (JSlider) e.getSource();
+				if (!source.getValueIsAdjusting()) {
+					min = (int) source.getValue();
+				}
+			}
+
+		});
+		maxSlider.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				JSlider source = (JSlider) e.getSource();
+				if (!source.getValueIsAdjusting()) {
+					max = (int) source.getValue();
+				}
+			}
+
+		});
+		south.add(minSlider);
+		south.add(maxSlider);
 	}
 
 	public MainPanel getMain() {

@@ -10,9 +10,9 @@ public class ImageProcessor {
 
 	private LineSelector lineSelect;
 
-	public ImageProcessor(BufferedImage img, int min, int max) {
+	public ImageProcessor(BufferedImage img, int min, int max, ImageUtils utils) {
 		this.img = img;
-		lineSelect = new LineSelector(img, min, max);
+		lineSelect = new LineSelector(img, min, max, utils);
 	}
 
 	public BufferedImage process() {

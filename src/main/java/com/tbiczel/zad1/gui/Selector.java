@@ -40,9 +40,11 @@ public class Selector implements MouseListener, MouseMotionListener {
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		panel.earseSelection();
-		System.out.println("Mouse: " + e.getY() + ", " + e.getX());
-		System.out.println("LineDarkness: " + utils.getLineDarkness(e.getY()));
-		System.out.println("PixelDarkness: "
+		System.err.println("Mouse: " + e.getY() + ", " + e.getX());
+		System.err.println("RowDarkness: " + utils.getRowDarkness(e.getY()));
+		System.err.println("ColumnDarkness: "
+				+ utils.getColumnDarkness(e.getX()));
+		System.err.println("PixelDarkness: "
 				+ utils.getPixelDarkness(e.getY(), e.getX()));
 	}
 

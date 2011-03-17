@@ -7,9 +7,7 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
@@ -19,20 +17,18 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingWorker;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import com.tbiczel.zad1.gui.ImagePanel;
 import com.tbiczel.zad1.gui.MainPanel;
 import com.tbiczel.zad1.gui.Selector;
+import com.tbiczel.zad1.io.DataDumper;
 import com.tbiczel.zad1.io.ImageFilter;
 import com.tbiczel.zad1.processing.ImageProcessor;
 import com.tbiczel.zad1.processing.ImageUtils;
-import com.tbiczel.zad1.processing.LinesData;
 
 public class ImageController {
 
-	private static final int blackThreshold = 100;
+	private static final int blackThreshold = 200;
 
 	private MainPanel main;
 
@@ -42,9 +38,8 @@ public class ImageController {
 	private JFileChooser outFileChooser;
 	private JButton openButton;
 	private JButton processButton;
-	private JButton dumpButton;
-	private JSlider minSlider = null;
-	private JSlider maxSlider = null;
+	private JButton dumpRowsButton;
+	private JButton dumpColumnsButton;
 	private JSlider lineHeightSlider;
 
 	private Selector selector;
@@ -53,18 +48,17 @@ public class ImageController {
 	private JPanel south = new JPanel();
 
 	private BufferedImage image;
+	private ImageProcessor proc;
 
 	private Rectangle selectedRegion = null;
 
 	private File safeCopy;
+	private File rowsFile = null;
+	private File columnsFile = null;
 
 	private SwingWorker<ImagePanel, Void> worker = null;
 
 	private ImageUtils utils;
-
-	private int min = 0;
-
-	private int max = 0;
 
 	public ImageController(String title) {
 		this.main = new MainPanel(title);
@@ -81,13 +75,6 @@ public class ImageController {
 					ImageController.this.cancelProcessing();
 					File file = fc.getSelectedFile();
 					ImageController.this.readImage(file);
-					if (minSlider != null) {
-						south.remove(minSlider);
-					}
-					if (maxSlider != null) {
-						south.remove(maxSlider);
-					}
-					addSliders();
 				}
 			}
 
@@ -101,26 +88,92 @@ public class ImageController {
 			}
 
 		});
-		dumpButton = new JButton("Dump selected lines data...");
-		dumpButton.addActionListener(new ActionListener() {
+		dumpRowsButton = new JButton("Dump selected rows data...");
+		dumpRowsButton.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				ImageController.this.cancelProcessing();
 				String selectedClassName = JOptionPane.showInputDialog(main,
 						"class name");
-				int returnVal = outFileChooser.showSaveDialog(main);
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					ImageController.this.dumpData(lineHeightSlider.getValue(),
-							selectedClassName, outFileChooser.getSelectedFile());
+				if (rowsFile == null) {
+					int returnVal = outFileChooser.showSaveDialog(main);
+					if (returnVal == JFileChooser.APPROVE_OPTION) {
+						rowsFile = outFileChooser.getSelectedFile();
+					}
 				}
+				if (selectedRegion == null || rowsFile == null) {
+					return;
+				}
+				worker = new DataDumper(rowsFile, lineHeightSlider.getValue(),
+						selectedClassName) {
+
+					@Override
+					protected int getLineDarkness(int i) {
+						return proc.getHorizontalLines().getLine(i);
+					}
+
+					@Override
+					protected int getSelectedRegionStart() {
+						return selectedRegion.y;
+					}
+
+					@Override
+					protected int getLinesNo() {
+						return selectedRegion.height;
+					}
+
+				};
+				worker.execute();
 			}
 
 		});
+		dumpColumnsButton = new JButton("Dump selected columns data...");
+		dumpColumnsButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				ImageController.this.cancelProcessing();
+				String selectedClassName = JOptionPane.showInputDialog(main,
+						"class name");
+				if (columnsFile == null) {
+					int returnVal = outFileChooser.showSaveDialog(main);
+					if (returnVal == JFileChooser.APPROVE_OPTION) {
+						columnsFile = outFileChooser.getSelectedFile();
+					}
+				}
+				if (selectedRegion == null || columnsFile == null) {
+					return;
+				}
+				worker = new DataDumper(columnsFile, lineHeightSlider
+						.getValue(), selectedClassName) {
+
+					@Override
+					protected int getLineDarkness(int i) {
+						return proc.getVerticalLines().getLine(i);
+					}
+
+					@Override
+					protected int getSelectedRegionStart() {
+						return selectedRegion.x;
+					}
+
+					@Override
+					protected int getLinesNo() {
+						return selectedRegion.width;
+					}
+
+				};
+				worker.execute();
+			}
+		}
+
+		);
 		east.setLayout(new GridLayout(0, 1));
 		east.add(openButton);
 		east.add(processButton);
-		east.add(dumpButton);
+		east.add(dumpRowsButton);
+		east.add(dumpColumnsButton);
 		main.setEastPanel(east);
 
 		lineHeightSlider = createSlider(0, 25, 10, 5, 1);
@@ -128,10 +181,6 @@ public class ImageController {
 		south.setLayout(new GridLayout(0, 1));
 		south.add(lineHeightSlider);
 		main.setSouthPanel(south);
-	}
-
-	private JSlider createSlider(int max, int val) {
-		return createSlider(0, max, val, 50, 5);
 	}
 
 	private JSlider createSlider(int minVal, int maxVal, int val,
@@ -149,6 +198,7 @@ public class ImageController {
 			panel = new ImagePanel();
 			image = ImageIO.read(file);
 			utils = new ImageUtils(image, blackThreshold);
+			proc = new ImageProcessor(image, blackThreshold, lineHeightSlider.getValue());
 			safeCopy = file;
 			panel.setImg(image);
 			changeImage();
@@ -158,57 +208,13 @@ public class ImageController {
 		}
 	}
 
-	protected void dumpData(final int lineHeight,
-			final String selectedClassName, final File file) {
-		if (selectedRegion == null) {
-			return;
-		}
-		worker = new SwingWorker<ImagePanel, Void>() {
-			private LinesData<Integer> lines = new LinesData<Integer>(image.getWidth());
-
-			@Override
-			protected ImagePanel doInBackground() throws Exception {
-				for (int i = 0; i < image.getHeight(); i++) {
-					lines.putLineData(i, utils.getLineDarkness(i));
-				}
-				file.createNewFile();
-				System.out.println(file.getAbsolutePath());
-				BufferedWriter out = new BufferedWriter(new FileWriter(file,
-						true));
-				for (int i = 0; i < selectedRegion.height; i++) {
-					StringBuilder sb = new StringBuilder();
-					for (int row = selectedRegion.y + i - lineHeight; row < selectedRegion.y
-							+ i + lineHeight + 1; row++) {
-						sb.append(lines.getLine(row));
-						sb.append(',');
-					}
-					sb.append(selectedClassName);
-					sb.append('\n');
-					out.write(sb.toString());
-				}
-				out.close();
-				return null;
-			}
-
-			@Override
-			protected void done() {
-				JOptionPane.showMessageDialog(main, "Dumping finished", "Done",
-						JOptionPane.INFORMATION_MESSAGE);
-			}
-		};
-		worker.execute();
-	}
-
 	public void processImage() {
 		worker = new SwingWorker<ImagePanel, Void>() {
-
-			private ImageProcessor proc;
 
 			@Override
 			protected ImagePanel doInBackground() throws Exception {
 				BufferedImage img = ImageIO.read(safeCopy);
-				proc = new ImageProcessor(img, min, max, utils);
-				img = proc.process();
+				img = proc.process(rowsFile, columnsFile);
 				ImagePanel panel = new ImagePanel();
 				panel.setImg(img);
 				return panel;
@@ -245,35 +251,6 @@ public class ImageController {
 		main.setImage(panel);
 		main.revalidate();
 		main.repaint();
-	}
-
-	private void addSliders() {
-		minSlider = createSlider(image.getWidth(), 0);
-		maxSlider = createSlider(image.getWidth(), 0);
-		minSlider.addChangeListener(new ChangeListener() {
-
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				JSlider source = (JSlider) e.getSource();
-				if (!source.getValueIsAdjusting()) {
-					min = (int) source.getValue();
-				}
-			}
-
-		});
-		maxSlider.addChangeListener(new ChangeListener() {
-
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				JSlider source = (JSlider) e.getSource();
-				if (!source.getValueIsAdjusting()) {
-					max = (int) source.getValue();
-				}
-			}
-
-		});
-		south.add(minSlider);
-		south.add(maxSlider);
 	}
 
 	public MainPanel getMain() {

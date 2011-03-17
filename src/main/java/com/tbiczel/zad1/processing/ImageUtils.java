@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage;
 public class ImageUtils {
 
 	private BufferedImage img;
-	
+
 	private int threshold;
 
 	public ImageUtils(BufferedImage img, int threshold) {
@@ -14,10 +14,19 @@ public class ImageUtils {
 	}
 
 	// number of black pixels
-	public int getLineDarkness(int i) {
+	public int getRowDarkness(int i) {
 		int darkness = 0;
 		for (int j = 0; j < img.getWidth(); j++) {
 			darkness += blackOrWhite(getPixelDarkness(i, j));
+		}
+		return darkness;
+	}
+
+	// number of black pixels
+	public int getColumnDarkness(int i) {
+		int darkness = 0;
+		for (int j = 0; j < img.getHeight(); j++) {
+			darkness += blackOrWhite(getPixelDarkness(j, i));
 		}
 		return darkness;
 	}
@@ -27,7 +36,7 @@ public class ImageUtils {
 		return (colour & (0x000000ff)) + ((colour & (0x0000ff00)) >> 8)
 				+ ((colour & (0x00ff0000)) >> 16);
 	}
-	
+
 	// black is 1
 	public int blackOrWhite(int darkness) {
 		if (darkness < threshold) {

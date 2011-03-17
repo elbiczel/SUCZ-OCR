@@ -15,12 +15,12 @@ import weka.core.Instances;
 public abstract class LineSelector {
 
 	protected BufferedImage img;
-	protected LinesData<Integer> lines;
+	protected LinesData<Double> lines;
 	protected int lineHeight;
 
 	protected Instances instances;
 
-	public LineSelector(BufferedImage img, LinesData<Integer> lines,
+	public LineSelector(BufferedImage img, LinesData<Double> lines,
 			int lineHeight) {
 		this.img = img;
 		this.lines = lines;
@@ -40,7 +40,7 @@ public abstract class LineSelector {
 	public Instance buildInstance(int row, String className) {
 		double[] instanceValues = new double[instances.numAttributes()];
 		for (int i = 0; i < lineHeight + lineHeight + 1; i++) {
-			instanceValues[i] = 1.0 * lines.getLine(i + row - lineHeight);
+			instanceValues[i] = lines.getLine(i + row - lineHeight);
 		}
 		double classVal = 0.;
 		if (className.equals("?")) {

@@ -6,39 +6,39 @@ public class ImageUtils {
 
 	private BufferedImage img;
 
-	private int threshold;
+	private double threshold;
 
-	public ImageUtils(BufferedImage img, int threshold) {
+	public ImageUtils(BufferedImage img, double threshold) {
 		this.img = img;
 		this.threshold = threshold;
 	}
 
 	// number of black pixels
-	public int getRowDarkness(int i) {
+	public double getRowDarkness(int i) {
 		int darkness = 0;
 		for (int j = 0; j < img.getWidth(); j++) {
 			darkness += blackOrWhite(getPixelDarkness(i, j));
 		}
-		return darkness;
+		return (1.0 * darkness) / img.getWidth();
 	}
 
 	// number of black pixels
-	public int getColumnDarkness(int i) {
+	public double getColumnDarkness(int i) {
 		int darkness = 0;
 		for (int j = 0; j < img.getHeight(); j++) {
 			darkness += blackOrWhite(getPixelDarkness(j, i));
 		}
-		return darkness;
+		return (1.0 * darkness) / img.getWidth();
 	}
 
-	public int getPixelDarkness(int row, int col) {
+	public double getPixelDarkness(int row, int col) {
 		int colour = img.getRGB(col, row);
-		return (colour & (0x000000ff)) + ((colour & (0x0000ff00)) >> 8)
-				+ ((colour & (0x00ff0000)) >> 16);
+		return ((colour & (0x000000ff)) + ((colour & (0x0000ff00)) >> 8) + ((colour & (0x00ff0000)) >> 16))
+				/ (1.0 * 765);
 	}
 
 	// black is 1
-	public int blackOrWhite(int darkness) {
+	public int blackOrWhite(double darkness) {
 		if (darkness < threshold) {
 			return 1;
 		}

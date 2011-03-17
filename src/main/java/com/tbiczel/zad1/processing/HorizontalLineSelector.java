@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 
 public class HorizontalLineSelector extends LineSelector {
 
-	public HorizontalLineSelector(BufferedImage img, LinesData<Integer> lines,
+	public HorizontalLineSelector(BufferedImage img, LinesData<Double> lines,
 			int lineHeight) {
 		super(img, lines, lineHeight);
 	}

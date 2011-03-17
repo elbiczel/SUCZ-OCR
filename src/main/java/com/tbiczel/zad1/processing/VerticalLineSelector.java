@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 
 public class VerticalLineSelector extends LineSelector {
 
-	public VerticalLineSelector(BufferedImage img, LinesData<Integer> lines,
+	public VerticalLineSelector(BufferedImage img, LinesData<Double> lines,
 			int lineHeight) {
 		super(img, lines, lineHeight);
 	}

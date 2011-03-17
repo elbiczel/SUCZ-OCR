@@ -56,7 +56,7 @@ public abstract class DataDumper extends SwingWorker<ImagePanel, Void> {
 
 	protected abstract int getSelectedRegionStart();
 
-	protected abstract int getLineDarkness(int i);
+	protected abstract double getLineDarkness(int i);
 
 	protected abstract int getLinesNo();
 

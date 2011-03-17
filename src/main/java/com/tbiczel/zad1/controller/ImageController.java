@@ -28,7 +28,7 @@ import com.tbiczel.zad1.processing.ImageUtils;
 
 public class ImageController {
 
-	private static final int blackThreshold = 200;
+	private static final double BLACK_THREASHOLD = 0.3;
 
 	private MainPanel main;
 
@@ -109,7 +109,7 @@ public class ImageController {
 						selectedClassName) {
 
 					@Override
-					protected int getLineDarkness(int i) {
+					protected double getLineDarkness(int i) {
 						return proc.getHorizontalLines().getLine(i);
 					}
 
@@ -149,7 +149,7 @@ public class ImageController {
 						.getValue(), selectedClassName) {
 
 					@Override
-					protected int getLineDarkness(int i) {
+					protected double getLineDarkness(int i) {
 						return proc.getVerticalLines().getLine(i);
 					}
 
@@ -197,8 +197,9 @@ public class ImageController {
 		try {
 			panel = new ImagePanel();
 			image = ImageIO.read(file);
-			utils = new ImageUtils(image, blackThreshold);
-			proc = new ImageProcessor(image, blackThreshold, lineHeightSlider.getValue());
+			utils = new ImageUtils(image, BLACK_THREASHOLD);
+			proc = new ImageProcessor(image, BLACK_THREASHOLD,
+					lineHeightSlider.getValue());
 			safeCopy = file;
 			panel.setImg(image);
 			changeImage();

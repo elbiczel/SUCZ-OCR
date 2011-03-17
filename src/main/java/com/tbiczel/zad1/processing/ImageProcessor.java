@@ -13,14 +13,14 @@ public class ImageProcessor {
 
 	private LineSelector verticalLineSelect;
 
-	private LinesData<Integer> horizontalLines;
+	private LinesData<Double> horizontalLines;
 
-	private LinesData<Integer> verticalLines;
+	private LinesData<Double> verticalLines;
 
-	private int blackThreashold;
+	private double blackThreashold;
 
 	private void prepareVerticalData(BufferedImage img) {
-		verticalLines = new LinesData<Integer>(0);
+		verticalLines = new LinesData<Double>(0.);
 		ImageUtils utils = new ImageUtils(img, blackThreashold);
 		for (int i = 0; i < img.getWidth(); i++) {
 			verticalLines.putLineData(i, utils.getColumnDarkness(i));
@@ -28,14 +28,14 @@ public class ImageProcessor {
 	}
 
 	private void prepareHorizontalData(BufferedImage img) {
-		horizontalLines = new LinesData<Integer>(0);
+		horizontalLines = new LinesData<Double>(0.);
 		ImageUtils utils = new ImageUtils(img, blackThreashold);
 		for (int i = 0; i < img.getHeight(); i++) {
 			horizontalLines.putLineData(i, utils.getRowDarkness(i));
 		}
 	}
 
-	public ImageProcessor(BufferedImage img, int blackThreashold, int lineHeight) {
+	public ImageProcessor(BufferedImage img, double blackThreashold, int lineHeight) {
 		this.img = img;
 		this.blackThreashold = blackThreashold;
 		prepareVerticalData(img);
@@ -63,11 +63,11 @@ public class ImageProcessor {
 		return img;
 	}
 
-	public LinesData<Integer> getHorizontalLines() {
+	public LinesData<Double> getHorizontalLines() {
 		return horizontalLines;
 	}
 
-	public LinesData<Integer> getVerticalLines() {
+	public LinesData<Double> getVerticalLines() {
 		return verticalLines;
 	}
 

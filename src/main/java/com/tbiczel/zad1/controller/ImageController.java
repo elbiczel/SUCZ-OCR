@@ -28,7 +28,7 @@ import com.tbiczel.zad1.processing.ImageUtils;
 
 public class ImageController {
 
-	private static final double BLACK_THREASHOLD = 0.3;
+	private static final double BLACK_THREASHOLD = 0.45;
 
 	private MainPanel main;
 

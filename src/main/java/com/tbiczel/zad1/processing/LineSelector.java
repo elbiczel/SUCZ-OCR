@@ -4,7 +4,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileReader;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.trees.RandomTree;
@@ -58,13 +58,13 @@ public abstract class LineSelector {
 	protected int begin = -1;
 	protected int height = 0;
 
-	public Vector<Rectangle> getLines(File lineAttributes) throws Exception {
+	public ArrayList<Rectangle> getLines(File lineAttributes) throws Exception {
 		instances = new Instances(new FileReader(lineAttributes));
 		instances.setClassIndex(instances.numAttributes() - 1);
 		RandomTree classifier = new RandomTree();
 		classifier.buildClassifier(instances);
 		System.err.println(classifier.toString());
-		Vector<Rectangle> result = new Vector<Rectangle>();
+		ArrayList<Rectangle> result = new ArrayList<Rectangle>();
 		resetLine();
 		for (int i = 0; i < getLinesNo(); i++) {
 			if (isLine(classifier, i)) {

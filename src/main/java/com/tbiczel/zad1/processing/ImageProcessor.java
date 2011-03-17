@@ -5,7 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.Vector;
+import java.util.ArrayList;
 
 public class ImageProcessor {
 
@@ -14,6 +14,8 @@ public class ImageProcessor {
 	private LineSelector horizontalLineSelect;
 
 	private LineSelector verticalLineSelect;
+
+	private CharSelector charSelect;
 
 	private LinesData<Double> horizontalLines;
 
@@ -47,13 +49,14 @@ public class ImageProcessor {
 				lineHeight);
 		verticalLineSelect = new VerticalLineSelector(img, verticalLines,
 				lineHeight);
+		charSelect = new CharSelector(blackThreashold);
 	}
 
 	public BufferedImage process(File rowsFile, File columnsFile)
 			throws Exception {
-		Vector<Rectangle> rows = horizontalLineSelect.getLines(rowsFile);
-		Vector<Rectangle> columns = verticalLineSelect.getLines(columnsFile);
-		Vector<Rectangle> textAreas = new Vector<Rectangle>(rows.size()
+		ArrayList<Rectangle> rows = horizontalLineSelect.getLines(rowsFile);
+		ArrayList<Rectangle> columns = verticalLineSelect.getLines(columnsFile);
+		ArrayList<Rectangle> textAreas = new ArrayList<Rectangle>(rows.size()
 				* columns.size());
 		for (Rectangle row : rows) {
 			for (Rectangle column : columns) {
@@ -61,8 +64,14 @@ public class ImageProcessor {
 			}
 		}
 		Graphics2D g = img.createGraphics();
-		g.setPaint(Color.GREEN);
 		for (Rectangle textArea : textAreas) {
+			g.setPaint(Color.GREEN);
+			BufferedImage textAreaImg = img.getSubimage(textArea.x, textArea.y,
+					textArea.width, textArea.height);
+			for (Rectangle character : charSelect.process(textAreaImg)) {
+				g.draw(character);
+			}
+			g.setPaint(Color.RED);
 			g.draw(textArea);
 		}
 		img.flush();

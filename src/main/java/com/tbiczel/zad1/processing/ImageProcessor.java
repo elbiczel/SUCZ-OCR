@@ -2,6 +2,7 @@ package com.tbiczel.zad1.processing;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
@@ -35,7 +36,8 @@ public class ImageProcessor {
 		}
 	}
 
-	public ImageProcessor(BufferedImage img, double blackThreashold, int lineHeight) {
+	public ImageProcessor(BufferedImage img, double blackThreashold,
+			int lineHeight) {
 		this.img = img;
 		this.blackThreashold = blackThreashold;
 		prepareVerticalData(img);
@@ -48,16 +50,14 @@ public class ImageProcessor {
 
 	public BufferedImage process(File rowsFile, File columnsFile)
 			throws Exception {
-
-		for (BufferedImage line : horizontalLineSelect.getLines(rowsFile)) {
-			Graphics2D g = line.createGraphics();
-			g.setPaint(Color.RED);
-			g.drawRect(0, 0, line.getWidth() - 1, line.getHeight() - 1);
+		Graphics2D g = img.createGraphics();
+		g.setPaint(Color.RED);
+		for (Rectangle line : horizontalLineSelect.getLines(rowsFile)) {
+			g.draw(line);
 		}
-		for (BufferedImage line : verticalLineSelect.getLines(columnsFile)) {
-			Graphics2D g = line.createGraphics();
-			g.setPaint(Color.CYAN);
-			g.drawRect(0, 0, line.getWidth() - 1, line.getHeight() - 1);
+		g.setPaint(Color.CYAN);
+		for (Rectangle line : verticalLineSelect.getLines(columnsFile)) {
+			g.draw(line);
 		}
 		img.flush();
 		return img;

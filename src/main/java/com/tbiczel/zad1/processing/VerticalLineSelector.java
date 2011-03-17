@@ -1,5 +1,8 @@
 package com.tbiczel.zad1.processing;
 
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 public class VerticalLineSelector extends LineSelector {
@@ -10,8 +13,9 @@ public class VerticalLineSelector extends LineSelector {
 	}
 
 	@Override
-	protected BufferedImage createLine() {
-		return img.getSubimage(begin, 0, height + 1, img.getHeight());
+	protected Rectangle createLine() {
+		return new Rectangle(new Point(begin, 0), new Dimension(height + 1,
+				img.getHeight()));
 	}
 
 	@Override

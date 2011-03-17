@@ -1,5 +1,6 @@
 package com.tbiczel.zad1.processing;
 
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileReader;
@@ -57,13 +58,13 @@ public abstract class LineSelector {
 	protected int begin = -1;
 	protected int height = 0;
 
-	public Vector<BufferedImage> getLines(File lineAttributes) throws Exception {
+	public Vector<Rectangle> getLines(File lineAttributes) throws Exception {
 		instances = new Instances(new FileReader(lineAttributes));
 		instances.setClassIndex(instances.numAttributes() - 1);
 		RandomTree classifier = new RandomTree();
 		classifier.buildClassifier(instances);
 		System.err.println(classifier.toString());
-		Vector<BufferedImage> result = new Vector<BufferedImage>();
+		Vector<Rectangle> result = new Vector<Rectangle>();
 		resetLine();
 		for (int i = 0; i < getLinesNo(); i++) {
 			if (isLine(classifier, i)) {
@@ -96,7 +97,7 @@ public abstract class LineSelector {
 		height = 0;
 	}
 
-	protected abstract BufferedImage createLine();
+	protected abstract Rectangle createLine();
 
 	protected abstract int getLinesNo();
 

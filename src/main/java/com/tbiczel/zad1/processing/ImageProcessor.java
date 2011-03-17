@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Vector;
 
 public class ImageProcessor {
 
@@ -50,14 +51,19 @@ public class ImageProcessor {
 
 	public BufferedImage process(File rowsFile, File columnsFile)
 			throws Exception {
-		Graphics2D g = img.createGraphics();
-		g.setPaint(Color.RED);
-		for (Rectangle line : horizontalLineSelect.getLines(rowsFile)) {
-			g.draw(line);
+		Vector<Rectangle> rows = horizontalLineSelect.getLines(rowsFile);
+		Vector<Rectangle> columns = verticalLineSelect.getLines(columnsFile);
+		Vector<Rectangle> textAreas = new Vector<Rectangle>(rows.size()
+				* columns.size());
+		for (Rectangle row : rows) {
+			for (Rectangle column : columns) {
+				textAreas.add(row.intersection(column));
+			}
 		}
-		g.setPaint(Color.CYAN);
-		for (Rectangle line : verticalLineSelect.getLines(columnsFile)) {
-			g.draw(line);
+		Graphics2D g = img.createGraphics();
+		g.setPaint(Color.GREEN);
+		for (Rectangle textArea : textAreas) {
+			g.draw(textArea);
 		}
 		img.flush();
 		return img;

@@ -17,6 +17,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
+import com.tbiczel.zad1.Constants;
 import com.tbiczel.zad1.gui.ImagePanel;
 import com.tbiczel.zad1.gui.MainPanel;
 import com.tbiczel.zad1.gui.Selector;
@@ -27,10 +28,6 @@ import com.tbiczel.zad1.processing.ImageProcessor;
 import com.tbiczel.zad1.processing.ImageUtils;
 
 public class ImageController {
-
-	private static final double BLACK_THREASHOLD = 0.35;
-
-	private static final int LINES_AROUND = 10;
 
 	private MainPanel main;
 
@@ -108,7 +105,7 @@ public class ImageController {
 				if (selectedRegion == null || rowsFile == null) {
 					return;
 				}
-				worker = new DataDumper(rowsFile, LINES_AROUND,
+				worker = new DataDumper(rowsFile, Constants.LINES_AROUND,
 						selectedClassName) {
 
 					@Override
@@ -149,7 +146,7 @@ public class ImageController {
 				if (selectedRegion == null || columnsFile == null) {
 					return;
 				}
-				worker = new DataDumper(columnsFile, LINES_AROUND,
+				worker = new DataDumper(columnsFile, Constants.LINES_AROUND,
 						selectedClassName) {
 
 					@Override
@@ -190,7 +187,7 @@ public class ImageController {
 			panel = new ImagePanel();
 			proc = null;
 			image = ImageIO.read(file);
-			utils = new ImageUtils(image, BLACK_THREASHOLD);
+			utils = new ImageUtils(image, Constants.BLACK_THREASHOLD);
 			safeCopy = file;
 			panel.setImg(image);
 			changeImage();
@@ -213,8 +210,9 @@ public class ImageController {
 					columnsClassifier = new ClassifierBuilder(columnsFile);
 				}
 				if (proc == null) {
-					proc = new ImageProcessor(image, BLACK_THREASHOLD,
-							LINES_AROUND, rowsClassifier, columnsClassifier);
+					proc = new ImageProcessor(image,
+							Constants.BLACK_THREASHOLD, Constants.LINES_AROUND,
+							rowsClassifier, columnsClassifier);
 				}
 				proc.drawRectangles(img, proc.process());
 				ImagePanel panel = new ImagePanel();

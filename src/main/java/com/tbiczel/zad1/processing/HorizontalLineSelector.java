@@ -10,7 +10,7 @@ import com.tbiczel.zad1.io.ClassifierBuilder;
 public class HorizontalLineSelector extends LineSelector {
 
 	public HorizontalLineSelector(BufferedImage img, LinesData<Double> lines,
-			int lineHeight, ClassifierBuilder rowsClassifier) throws Exception {
+			int lineHeight, ClassifierBuilder rowsClassifier) {
 		super(img, lines, lineHeight, rowsClassifier);
 	}
 

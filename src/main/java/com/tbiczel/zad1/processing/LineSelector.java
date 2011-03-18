@@ -20,8 +20,7 @@ public abstract class LineSelector {
 	private ClassifierBuilder classifierBuilder;
 
 	public LineSelector(BufferedImage img, LinesData<Double> lines,
-			int lineHeight, ClassifierBuilder columnsClassifier)
-			throws Exception {
+			int lineHeight, ClassifierBuilder columnsClassifier) {
 		this.img = img;
 		this.lines = lines;
 		this.lineHeight = lineHeight;

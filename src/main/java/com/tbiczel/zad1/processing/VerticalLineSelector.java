@@ -10,7 +10,7 @@ import com.tbiczel.zad1.io.ClassifierBuilder;
 public class VerticalLineSelector extends LineSelector {
 
 	public VerticalLineSelector(BufferedImage img, LinesData<Double> lines,
-			int lineHeight, ClassifierBuilder columnsClassifier) throws Exception {
+			int lineHeight, ClassifierBuilder columnsClassifier) {
 		super(img, lines, lineHeight, columnsClassifier);
 	}
 

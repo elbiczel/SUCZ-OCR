@@ -40,7 +40,7 @@ public class ImageProcessor {
 
 	public ImageProcessor(BufferedImage img, double blackThreashold,
 			int lineHeight, ClassifierBuilder rowsClassifier,
-			ClassifierBuilder columnsClassifier) throws Exception {
+			ClassifierBuilder columnsClassifier) {
 		this.blackThreashold = blackThreashold;
 		prepareVerticalData(img);
 		prepareHorizontalData(img);

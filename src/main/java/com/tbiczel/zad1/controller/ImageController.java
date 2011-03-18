@@ -1,8 +1,6 @@
 package com.tbiczel.zad1.controller;
 
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -22,6 +20,7 @@ import javax.swing.SwingWorker;
 import com.tbiczel.zad1.gui.ImagePanel;
 import com.tbiczel.zad1.gui.MainPanel;
 import com.tbiczel.zad1.gui.Selector;
+import com.tbiczel.zad1.io.ClassifierBuilder;
 import com.tbiczel.zad1.io.DataDumper;
 import com.tbiczel.zad1.io.ImageFilter;
 import com.tbiczel.zad1.processing.ImageProcessor;
@@ -50,12 +49,14 @@ public class ImageController {
 	private JPanel south = new JPanel();
 
 	private BufferedImage image;
-	private ImageProcessor proc;
+	private ImageProcessor proc = null;
 
 	private Rectangle selectedRegion = null;
 
 	private File safeCopy;
+	private ClassifierBuilder rowsClassifier = null;
 	private File rowsFile = null;
+	private ClassifierBuilder columnsClassifier = null;
 	private File columnsFile = null;
 
 	private SwingWorker<ImagePanel, Void> worker = null;
@@ -112,7 +113,7 @@ public class ImageController {
 
 					@Override
 					protected double getLineDarkness(int i) {
-						return proc.getHorizontalLines().getLine(i);
+						return utils.getRowDarkness(i);
 					}
 
 					@Override
@@ -126,6 +127,7 @@ public class ImageController {
 					}
 
 				};
+				rowsClassifier = null;
 				worker.execute();
 			}
 
@@ -152,7 +154,7 @@ public class ImageController {
 
 					@Override
 					protected double getLineDarkness(int i) {
-						return proc.getVerticalLines().getLine(i);
+						return utils.getColumnDarkness(i);
 					}
 
 					@Override
@@ -166,6 +168,7 @@ public class ImageController {
 					}
 
 				};
+				columnsClassifier = null;
 				worker.execute();
 			}
 		}
@@ -185,9 +188,9 @@ public class ImageController {
 	public ImagePanel readImage(File file) {
 		try {
 			panel = new ImagePanel();
+			proc = null;
 			image = ImageIO.read(file);
 			utils = new ImageUtils(image, BLACK_THREASHOLD);
-			proc = new ImageProcessor(image, BLACK_THREASHOLD, LINES_AROUND);
 			safeCopy = file;
 			panel.setImg(image);
 			changeImage();
@@ -203,12 +206,17 @@ public class ImageController {
 			@Override
 			protected ImagePanel doInBackground() throws Exception {
 				BufferedImage img = ImageIO.read(safeCopy);
-				Graphics2D g = img.createGraphics();
-				g.setPaint(Color.RED);
-				for (Rectangle character : proc.process(rowsFile, columnsFile)) {
-					g.draw(character);
+				if (rowsClassifier == null) {
+					rowsClassifier = new ClassifierBuilder(rowsFile);
 				}
-				img.flush();
+				if (columnsClassifier == null) {
+					columnsClassifier = new ClassifierBuilder(columnsFile);
+				}
+				if (proc == null) {
+					proc = new ImageProcessor(image, BLACK_THREASHOLD,
+							LINES_AROUND, rowsClassifier, columnsClassifier);
+				}
+				proc.drawRectangles(img, proc.process());
 				ImagePanel panel = new ImagePanel();
 				panel.setImg(img);
 				return panel;

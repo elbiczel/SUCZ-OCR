@@ -1,9 +1,12 @@
 package com.tbiczel.zad1.processing;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.ArrayList;
+
+import com.tbiczel.zad1.io.ClassifierBuilder;
 
 public class ImageProcessor {
 
@@ -36,21 +39,21 @@ public class ImageProcessor {
 	}
 
 	public ImageProcessor(BufferedImage img, double blackThreashold,
-			int lineHeight) {
+			int lineHeight, ClassifierBuilder rowsClassifier,
+			ClassifierBuilder columnsClassifier) throws Exception {
 		this.blackThreashold = blackThreashold;
 		prepareVerticalData(img);
 		prepareHorizontalData(img);
 		horizontalLineSelect = new HorizontalLineSelector(img, horizontalLines,
-				lineHeight);
+				lineHeight, rowsClassifier);
 		verticalLineSelect = new VerticalLineSelector(img, verticalLines,
-				lineHeight);
+				lineHeight, columnsClassifier);
 		charSelect = new CharSelector(blackThreashold, img);
 	}
 
-	public ArrayList<Rectangle> process(File rowsFile, File columnsFile)
-			throws Exception {
-		ArrayList<Rectangle> rows = horizontalLineSelect.getLines(rowsFile);
-		ArrayList<Rectangle> columns = verticalLineSelect.getLines(columnsFile);
+	public ArrayList<Rectangle> process() throws Exception {
+		ArrayList<Rectangle> rows = horizontalLineSelect.getLines();
+		ArrayList<Rectangle> columns = verticalLineSelect.getLines();
 		ArrayList<Rectangle> textAreas = new ArrayList<Rectangle>(rows.size()
 				* columns.size());
 		for (Rectangle row : rows) {
@@ -64,6 +67,15 @@ public class ImageProcessor {
 			result.addAll(charSelect.process(textArea));
 		}
 		return result;
+	}
+
+	public void drawRectangles(BufferedImage img, ArrayList<Rectangle> parts) {
+		Graphics2D g = img.createGraphics();
+		g.setPaint(Color.RED);
+		for (Rectangle character : parts) {
+			g.draw(character);
+		}
+		img.flush();
 	}
 
 	public LinesData<Double> getHorizontalLines() {

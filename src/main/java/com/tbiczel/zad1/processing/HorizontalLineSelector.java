@@ -5,11 +5,13 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
+import com.tbiczel.zad1.io.ClassifierBuilder;
+
 public class HorizontalLineSelector extends LineSelector {
 
 	public HorizontalLineSelector(BufferedImage img, LinesData<Double> lines,
-			int lineHeight) {
-		super(img, lines, lineHeight);
+			int lineHeight, ClassifierBuilder rowsClassifier) throws Exception {
+		super(img, lines, lineHeight, rowsClassifier);
 	}
 
 	@Override

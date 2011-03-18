@@ -2,16 +2,14 @@ package com.tbiczel.zad1.processing;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileReader;
 import java.util.ArrayList;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.trees.RandomTree;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.Instances;
+
+import com.tbiczel.zad1.io.ClassifierBuilder;
 
 public abstract class LineSelector {
 
@@ -19,10 +17,11 @@ public abstract class LineSelector {
 	protected LinesData<Double> lines;
 	protected int lineHeight;
 
-	protected Instances instances;
+	private ClassifierBuilder classifierBuilder;
 
 	public LineSelector(BufferedImage img, LinesData<Double> lines,
-			int lineHeight) {
+			int lineHeight, ClassifierBuilder columnsClassifier)
+			throws Exception {
 		this.img = img;
 		this.lines = lines;
 		this.lineHeight = lineHeight;
@@ -36,10 +35,11 @@ public abstract class LineSelector {
 		}
 		Attribute classAttr = new Attribute("class", attributes.size());
 		attributes.addElement(classAttr);
+		this.classifierBuilder = columnsClassifier;
 	}
 
-	public Instance buildInstance(int row, String className) {
-		double[] instanceValues = new double[instances.numAttributes()];
+	protected Instance buildInstance(int row, String className) {
+		double[] instanceValues = new double[lineHeight + lineHeight + 2];
 		for (int i = 0; i < lineHeight + lineHeight + 1; i++) {
 			instanceValues[i] = lines.getLine(i + row - lineHeight);
 		}
@@ -49,25 +49,20 @@ public abstract class LineSelector {
 		} else if (className.equals("line")) {
 			classVal = 1.;
 		}
-		instanceValues[instances.numAttributes() - 1] = classVal;
+		instanceValues[lineHeight + lineHeight + 1] = classVal;
 		Instance inst = new Instance(1.0, instanceValues);
-		inst.setDataset(instances);
+		inst.setDataset(classifierBuilder.getInstances());
 		return inst;
 	}
 
 	protected int begin = -1;
 	protected int height = 0;
 
-	public ArrayList<Rectangle> getLines(File lineAttributes) throws Exception {
-		instances = new Instances(new FileReader(lineAttributes));
-		instances.setClassIndex(instances.numAttributes() - 1);
-		RandomTree classifier = new RandomTree();
-		classifier.buildClassifier(instances);
-		System.err.println(classifier.toString());
+	public ArrayList<Rectangle> getLines() throws Exception {
 		ArrayList<Rectangle> result = new ArrayList<Rectangle>();
 		resetLine();
 		for (int i = 0; i < getLinesNo(); i++) {
-			if (isLine(classifier, i)) {
+			if (isLine(classifierBuilder.getClassifier(), i)) {
 				expandLine(i);
 			} else if (insideLine()) {
 				result.add(createLine());

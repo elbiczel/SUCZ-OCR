@@ -1,6 +1,8 @@
 package com.tbiczel.zad1.controller;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -15,7 +17,6 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JSlider;
 import javax.swing.SwingWorker;
 
 import com.tbiczel.zad1.gui.ImagePanel;
@@ -28,7 +29,9 @@ import com.tbiczel.zad1.processing.ImageUtils;
 
 public class ImageController {
 
-	private static final double BLACK_THREASHOLD = 0.45;
+	private static final double BLACK_THREASHOLD = 0.35;
+
+	private static final int LINES_AROUND = 10;
 
 	private MainPanel main;
 
@@ -40,7 +43,6 @@ public class ImageController {
 	private JButton processButton;
 	private JButton dumpRowsButton;
 	private JButton dumpColumnsButton;
-	private JSlider lineHeightSlider;
 
 	private Selector selector;
 
@@ -105,7 +107,7 @@ public class ImageController {
 				if (selectedRegion == null || rowsFile == null) {
 					return;
 				}
-				worker = new DataDumper(rowsFile, lineHeightSlider.getValue(),
+				worker = new DataDumper(rowsFile, LINES_AROUND,
 						selectedClassName) {
 
 					@Override
@@ -145,8 +147,8 @@ public class ImageController {
 				if (selectedRegion == null || columnsFile == null) {
 					return;
 				}
-				worker = new DataDumper(columnsFile, lineHeightSlider
-						.getValue(), selectedClassName) {
+				worker = new DataDumper(columnsFile, LINES_AROUND,
+						selectedClassName) {
 
 					@Override
 					protected double getLineDarkness(int i) {
@@ -176,21 +178,8 @@ public class ImageController {
 		east.add(dumpColumnsButton);
 		main.setEastPanel(east);
 
-		lineHeightSlider = createSlider(0, 25, 10, 5, 1);
-
 		south.setLayout(new GridLayout(0, 1));
-		south.add(lineHeightSlider);
 		main.setSouthPanel(south);
-	}
-
-	private JSlider createSlider(int minVal, int maxVal, int val,
-			int majTickSpacing, int minTickSpacing) {
-		JSlider result = new JSlider(minVal, maxVal, val);
-		result.setMajorTickSpacing(majTickSpacing);
-		result.setMinorTickSpacing(minTickSpacing);
-		result.setPaintTicks(true);
-		result.setPaintLabels(true);
-		return result;
 	}
 
 	public ImagePanel readImage(File file) {
@@ -198,8 +187,7 @@ public class ImageController {
 			panel = new ImagePanel();
 			image = ImageIO.read(file);
 			utils = new ImageUtils(image, BLACK_THREASHOLD);
-			proc = new ImageProcessor(image, BLACK_THREASHOLD,
-					lineHeightSlider.getValue());
+			proc = new ImageProcessor(image, BLACK_THREASHOLD, LINES_AROUND);
 			safeCopy = file;
 			panel.setImg(image);
 			changeImage();
@@ -215,7 +203,12 @@ public class ImageController {
 			@Override
 			protected ImagePanel doInBackground() throws Exception {
 				BufferedImage img = ImageIO.read(safeCopy);
-				img = proc.process(rowsFile, columnsFile);
+				Graphics2D g = img.createGraphics();
+				g.setPaint(Color.RED);
+				for (Rectangle character : proc.process(rowsFile, columnsFile)) {
+					g.draw(character);
+				}
+				img.flush();
 				ImagePanel panel = new ImagePanel();
 				panel.setImg(img);
 				return panel;

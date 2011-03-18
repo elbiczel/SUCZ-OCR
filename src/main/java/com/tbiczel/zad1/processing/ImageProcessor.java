@@ -1,15 +1,11 @@
 package com.tbiczel.zad1.processing;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 
 public class ImageProcessor {
-
-	private BufferedImage img;
 
 	private LineSelector horizontalLineSelect;
 
@@ -41,7 +37,6 @@ public class ImageProcessor {
 
 	public ImageProcessor(BufferedImage img, double blackThreashold,
 			int lineHeight) {
-		this.img = img;
 		this.blackThreashold = blackThreashold;
 		prepareVerticalData(img);
 		prepareHorizontalData(img);
@@ -49,10 +44,10 @@ public class ImageProcessor {
 				lineHeight);
 		verticalLineSelect = new VerticalLineSelector(img, verticalLines,
 				lineHeight);
-		charSelect = new CharSelector(blackThreashold);
+		charSelect = new CharSelector(blackThreashold, img);
 	}
 
-	public BufferedImage process(File rowsFile, File columnsFile)
+	public ArrayList<Rectangle> process(File rowsFile, File columnsFile)
 			throws Exception {
 		ArrayList<Rectangle> rows = horizontalLineSelect.getLines(rowsFile);
 		ArrayList<Rectangle> columns = verticalLineSelect.getLines(columnsFile);
@@ -63,19 +58,12 @@ public class ImageProcessor {
 				textAreas.add(row.intersection(column));
 			}
 		}
-		Graphics2D g = img.createGraphics();
+		ArrayList<Rectangle> result = new ArrayList<Rectangle>(rows.size()
+				* columns.size() * 40);
 		for (Rectangle textArea : textAreas) {
-			g.setPaint(Color.GREEN);
-			BufferedImage textAreaImg = img.getSubimage(textArea.x, textArea.y,
-					textArea.width, textArea.height);
-			for (Rectangle character : charSelect.process(textAreaImg)) {
-				g.draw(character);
-			}
-			g.setPaint(Color.RED);
-			g.draw(textArea);
+			result.addAll(charSelect.process(textArea));
 		}
-		img.flush();
-		return img;
+		return result;
 	}
 
 	public LinesData<Double> getHorizontalLines() {
